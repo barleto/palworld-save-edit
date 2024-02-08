@@ -3,6 +3,9 @@ const path = require('path');
 const inquirer = require('@inquirer/prompts');
 const { exec } = require('child_process');
 const convertSavAndJson = require('./convertSavAndJson');
+const simplifyObj = require('./simplifyJSON');
+const { Console } = require('console');
+const { setTimeout } = require('timers');
 
 (async function() {
 
@@ -23,21 +26,26 @@ const convertSavAndJson = require('./convertSavAndJson');
     Cancel: 0,
     Load: 1,
     Save: 2,
+    SimplifyJson: 3
   }
   const mode = await inquirer.select({
     message: 'What you want to do?',
     choices: [
         {
             name: "Cancel",
-            value: 0,
+            value: Modes.Cancel,
         },
         {
             name: "Load",
-            value: 1,
+            value: Modes.Load,
         },
         {
             name: "Save",
-            value: 2,
+            value: Modes.Save,
+        },
+        {
+          name: "Simplify JSON",
+          value: Modes.SimplifyJson
         }
     ],
 });
@@ -60,7 +68,7 @@ const convertSavAndJson = require('./convertSavAndJson');
       const savFilePath = path.join(path.join(worldPath, "Players"), savFileName);
       await convertSavAndJson(convertPyPath, savFilePath, savFileName);
     }
-    const { stdout, stderr } = exec(`code ${worldPath}`);
+    openVSCode(worldPath);
   } else if(mode === Modes.Save){
     for(let savFileName of savFolderFiles) {
       savFileName += ".json";
@@ -72,7 +80,31 @@ const convertSavAndJson = require('./convertSavAndJson');
       const savFilePath = path.join(path.join(worldPath, "Players"), savFileName);
       await convertSavAndJson(convertPyPath, savFilePath, savFileName);
     }
+  } else if(mode === Modes.SimplifyJson) {
+    let jsonFiles = folderFiles.filter(f => path.extname(f) === ".json" && f.indexOf(".simp.json") < 0);
+    jsonFiles = jsonFiles.map(f => path.basename(f, ".json"));
+    for(const jsonFilePath of jsonFiles) {
+      const fullFilePathNoExt = path.join(worldPath, jsonFilePath);
+      console.log(`Simplifying "${fullFilePathNoExt}.json"`);
+      var obj = JSON.parse(fs.readFileSync(fullFilePathNoExt+ ".json"));
+      simplifyObj("",obj);
+      fs.writeFileSync(fullFilePathNoExt + ".simp.json", JSON.stringify(obj, null, 2));
+    }
+    for(let savFileName of fs.readdirSync(path.join(worldPath, "Players")).filter(f => path.extname(f) === ".sav")) {
+      const fullFilePathNoExt = path.join(path.join(worldPath, "Players"), savFileName);
+      console.log(`Simplifying "${fullFilePathNoExt}.json"`);
+      var obj = JSON.parse(fs.readFileSync(fullFilePathNoExt+ ".json"));
+      simplifyObj("",obj);
+      fs.writeFileSync(fullFilePathNoExt + ".simp.json", JSON.stringify(obj, null, 2));
+    }
+    openVSCode(worldPath);
   }
 
 
 })();
+
+function openVSCode(worldPath) {
+  setTimeout(() => {
+    const { stdout, stderr } = exec(`code ${worldPath}`);
+  }, 5000);
+}
