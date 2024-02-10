@@ -39,26 +39,26 @@ function decorateTreeSecondPass(parent, parentKey) {
         decorateTreeSecondPass(parent[parentKey], key);
     }
     
-    for (const key in parent[parentKey]) {
-        const childItem = parent[parentKey][key];
-        if ( childItem && (childItem.key || childItem.key === 0) && childItem.value && Object.keys(childItem).length === 2 ) {
-            decorateTreeSecondPass(childItem, "key");
-            decorateTreeSecondPass(childItem, "value");
-            const newKey = childItem.key;
-            const value = childItem.value;
-            const newKeyExists = newKey || newKey === 0;
-            if (typeof newKey !== "object" && newKeyExists) {
-                parent[parentKey][key] = {
-                    [newKey]: value,
-                };
-            } else {
-                parent[parentKey][key] = {
-                    key: newKey,
-                    value: value,
-                };
-            }
-        }
-    }
+    // for (const key in parent[parentKey]) {
+    //     const childItem = parent[parentKey][key];
+    //     if ( childItem && (childItem.key || childItem.key === 0) && childItem.value && Object.keys(childItem).length === 2 ) {
+    //         decorateTreeSecondPass(childItem, "key");
+    //         decorateTreeSecondPass(childItem, "value");
+    //         const newKey = childItem.key;
+    //         const value = childItem.value;
+    //         const newKeyExists = newKey || newKey === 0;
+    //         if (typeof newKey !== "object" && newKeyExists) {
+    //             parent[parentKey][key] = {
+    //                 [newKey]: value,
+    //             };
+    //         } else {
+    //             parent[parentKey][key] = {
+    //                 key: newKey,
+    //                 value: value,
+    //             };
+    //         }
+    //     }
+    // }
 
     if(!Array.isArray(parent[parentKey])) {
         for (const key in parent[parentKey]) {

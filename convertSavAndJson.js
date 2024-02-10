@@ -20,6 +20,11 @@ const convertSavAndJson = async (relativeInstallPath, targetPath, label = '') =>
   }
   console.info(`Running CheahJS' awesome save-tools to convert to ${convertTargetType} in ${targetPath}`);
 
+  if(targetPath.endsWith('.sav')) {
+    fs.copyFileSync(targetPath, targetPath+".bkp");
+    console.log(`Created backup at "${targetPath+".bkp"}"`);
+  }
+
   const { stdout, stderr } = await execAsync(`python ${relativeInstallPath}\\convert.py --force ${targetPath}`);
   console.log(stdout);
 
